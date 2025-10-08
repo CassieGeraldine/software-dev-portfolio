@@ -93,7 +93,7 @@ export function AboutSection() {
         <div ref={bioRef} className="space-y-6">
           <div className="space-y-4 text-lg leading-relaxed">
             <p>
-              I'm currently studying Computer Science at WeThinkCode_, where I'm honing my skills in software
+              I'm currently studying Software Engineering at WeThinkCode_, where I'm honing my skills in software
               development, algorithms, and problem-solving. My journey in tech has been driven by curiosity and a desire
               to build solutions that make a difference.
             </p>
