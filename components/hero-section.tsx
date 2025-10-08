@@ -134,7 +134,7 @@ export function HeroSection() {
                       </svg>
                     </div>
                     <p className="text-sm font-medium text-black/80">HeyGen Video Placeholder</p>
-                    <p className="text-xs text-black/60">Click to upload your video</p>
+                    <p className="text-xs text-black/60">upload</p>
                     <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                   </label>
                 </div>

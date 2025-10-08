@@ -7,35 +7,108 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Send, CheckCircle2 } from "lucide-react"
+import { Send, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
+import { submitContactForm } from "@/lib/services/contactService"
+import { getClientInfo, isValidEmail, sanitizeInput } from "@/lib/utils/contactUtils"
+import type { ContactFormData } from "@/lib/types/contact"
 
 export function ContactForm() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
     subject: "",
     message: "",
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [validationErrors, setValidationErrors] = useState<Partial<ContactFormData>>({})
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = (): boolean => {
+    const errors: Partial<ContactFormData> = {}
+
+    if (!formData.name.trim()) {
+      errors.name = "Name is required"
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = "Email is required"
+    } else if (!isValidEmail(formData.email)) {
+      errors.email = "Please enter a valid email address"
+    }
+
+    if (!formData.subject.trim()) {
+      errors.subject = "Subject is required"
+    }
+
+    if (!formData.message.trim()) {
+      errors.message = "Message is required"
+    } else if (formData.message.trim().length < 10) {
+      errors.message = "Message must be at least 10 characters long"
+    }
+
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real application, you would send this data to a backend
-    console.log("Form submitted:", formData)
-    setIsSubmitted(true)
+    setError(null)
 
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setFormData({ name: "", email: "", subject: "", message: "" })
-      setIsSubmitted(false)
-    }, 3000)
+    if (!validateForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      // Sanitize form data
+      const sanitizedData: ContactFormData = {
+        name: sanitizeInput(formData.name),
+        email: sanitizeInput(formData.email),
+        subject: sanitizeInput(formData.subject),
+        message: sanitizeInput(formData.message),
+      }
+
+      // Get client information
+      const clientInfo = getClientInfo()
+
+      // Submit to Firebase
+      const result = await submitContactForm(sanitizedData, clientInfo)
+
+      if (result.success) {
+        setIsSubmitted(true)
+        setFormData({ name: "", email: "", subject: "", message: "" })
+
+        // Reset success state after 5 seconds
+        setTimeout(() => {
+          setIsSubmitted(false)
+        }, 5000)
+      } else {
+        setError(result.message || "Failed to send message. Please try again.")
+      }
+    } catch (err) {
+      console.error("Error submitting form:", err)
+      setError("An unexpected error occurred. Please try again later.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     })
+
+    // Clear validation error when user starts typing
+    if (validationErrors[name as keyof ContactFormData]) {
+      setValidationErrors({
+        ...validationErrors,
+        [name]: undefined,
+      })
+    }
   }
 
   if (isSubmitted) {
@@ -56,25 +129,36 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="bg-secondary rounded-xl p-8 space-y-6">
+      {error && (
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="name" className="text-secondary-foreground">
-            Name *
+            Full Name
           </Label>
           <Input
             id="name"
             name="name"
+            type="text"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Your name"
-            required
-            className="bg-background text-card-foreground"
+            placeholder="John Doe"
+            className={`bg-background ${validationErrors.name ? 'border-red-500' : ''}`}
+            disabled={isSubmitting}
           />
+          {validationErrors.name && (
+            <p className="text-red-500 text-xs">{validationErrors.name}</p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="email" className="text-secondary-foreground">
-            Email *
+            Email Address
           </Label>
           <Input
             id="email"
@@ -82,47 +166,71 @@ export function ContactForm() {
             type="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="your.email@example.com"
-            required
-            className="bg-background text-card-foreground"
+            placeholder="john@example.com"
+            className={`bg-background ${validationErrors.email ? 'border-red-500' : ''}`}
+            disabled={isSubmitting}
           />
+          {validationErrors.email && (
+            <p className="text-red-500 text-xs">{validationErrors.email}</p>
+          )}
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="subject" className="text-secondary-foreground">
-          Subject *
+          Subject
         </Label>
         <Input
           id="subject"
           name="subject"
+          type="text"
           value={formData.subject}
           onChange={handleChange}
-          placeholder="What's this about?"
-          required
-          className="bg-background text-card-foreground"
+          placeholder="Project Inquiry"
+          className={`bg-background ${validationErrors.subject ? 'border-red-500' : ''}`}
+          disabled={isSubmitting}
         />
+        {validationErrors.subject && (
+          <p className="text-red-500 text-xs">{validationErrors.subject}</p>
+        )}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="message" className="text-secondary-foreground">
-          Message *
+          Message
         </Label>
         <Textarea
           id="message"
           name="message"
           value={formData.message}
           onChange={handleChange}
-          placeholder="Tell me about your project or inquiry..."
+          placeholder="Tell me about your project or how I can help you..."
           rows={6}
-          required
-          className="bg-background text-card-foreground"
+          className={`bg-background resize-none ${validationErrors.message ? 'border-red-500' : ''}`}
+          disabled={isSubmitting}
         />
+        {validationErrors.message && (
+          <p className="text-red-500 text-xs">{validationErrors.message}</p>
+        )}
       </div>
 
-      <Button type="submit" className="w-full bg-primary text-primary-foreground hover:opacity-90">
-        <Send className="w-4 h-4 mr-2" />
-        Send Message
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Sending Message...
+          </>
+        ) : (
+          <>
+            <Send className="w-4 h-4 mr-2" />
+            Send Message
+          </>
+        )}
       </Button>
     </form>
   )
