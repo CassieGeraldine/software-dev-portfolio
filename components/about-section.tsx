@@ -159,7 +159,7 @@ export function AboutSection() {
                 <GraduationCap className="w-6 h-6 text-background" />
               </div>
               <div className="space-y-2">
-                <h4 className="text-xl font-bold">WeThinkCode_</h4>
+                <h4 className="text-xl font-bold">WeThinkCode</h4>
                 <p className="text-secondary-foreground/80">Software Engineering Student</p>
               </div>
             </div>
