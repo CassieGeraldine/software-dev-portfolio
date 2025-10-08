@@ -144,7 +144,7 @@ export function HeroSection() {
             {/* Right: Location and Tagline */}
             <div className="space-y-8 order-3">
               <div className="text-right">
-                <div className="text-xs tracking-[0.3em] font-medium">BASED IN JOHANNESBURG</div>
+                <div className="text-xs tracking-[0.3em] font-medium">BASED IN CAPE TOWN</div>
               </div>
               <div className="text-right">
                 <p ref={taglineRef} className="text-sm font-medium min-h-[2rem]"></p>

@@ -93,9 +93,11 @@ export function AboutSection() {
         <div ref={bioRef} className="space-y-6">
           <div className="space-y-4 text-lg leading-relaxed">
             <p>
-              I'm currently studying Software Engineering at WeThinkCode_, where I'm honing my skills in software
-              development, algorithms, and problem-solving. My journey in tech has been driven by curiosity and a desire
-              to build solutions that make a difference.
+            I’m currently studying Software Engineering at WeThinkCode,
+             a peer-to-peer learning institution that focuses on real-world,
+             work-simulated projects. The program emphasizes collaboration,
+             problem-solving, and critical thinking, allowing me to build practical
+              experience in software development while working on challenging projects with other aspiring developers.
             </p>
 
             <p>
@@ -124,8 +126,9 @@ export function AboutSection() {
               <li>• Full-Stack Web Development</li>
               <li>• JavaScript, TypeScript, Python</li>
               <li>• React, Next.js, Node.js</li>
+               <li>• Ruby on Rails, Java</li>
               <li>• Database Design & Management</li>
-              <li>• RESTful APIs & GraphQL</li>
+              <li>• RESTful APIs</li>
             </ul>
           </div>
 
@@ -157,7 +160,7 @@ export function AboutSection() {
               </div>
               <div className="space-y-2">
                 <h4 className="text-xl font-bold">WeThinkCode_</h4>
-                <p className="text-secondary-foreground/80">Computer Science Student</p>
+                <p className="text-secondary-foreground/80">Software Engineering Student</p>
               </div>
             </div>
 

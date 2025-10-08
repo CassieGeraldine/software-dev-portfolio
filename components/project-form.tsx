@@ -123,7 +123,7 @@ export function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="demoLink">Demo Link</Label>
+          <Label htmlFor="demoLink">Project Link</Label>
           <Input
             id="demoLink"
             name="demoLink"
