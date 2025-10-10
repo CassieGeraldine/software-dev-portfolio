@@ -12,26 +12,40 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 }
 
-// Validate that all required environment variables are present
-const requiredEnvVars = [
-  'NEXT_PUBLIC_FIREBASE_API_KEY',
-  'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
-  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
-  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-  'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
-  'NEXT_PUBLIC_FIREBASE_APP_ID'
-]
+// Validate configuration in development
+if (process.env.NODE_ENV === 'development') {
+  const requiredEnvVars = [
+    'NEXT_PUBLIC_FIREBASE_API_KEY',
+    'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
+    'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
+    'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
+    'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
+    'NEXT_PUBLIC_FIREBASE_APP_ID'
+  ]
 
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    throw new Error(`Missing required environment variable: ${envVar}`)
+  const missingVars = requiredEnvVars.filter(envVar => !process.env[envVar])
+
+  if (missingVars.length > 0) {
+    console.error('Missing Firebase environment variables:', missingVars)
+    console.error('Please check your .env.local file and ensure all Firebase environment variables are set.')
+    console.error('Refer to .env.example for the required variables.')
   }
 }
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig)
+// Initialize Firebase only if we have the required config
+let app: any = null
+let db: any = null
 
-// Initialize Firestore
-export const db = getFirestore(app)
+try {
+  if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+    app = initializeApp(firebaseConfig)
+    db = getFirestore(app)
+  } else {
+    console.warn('Firebase not initialized: Missing required configuration')
+  }
+} catch (error) {
+  console.error('Error initializing Firebase:', error)
+}
 
+export { db }
 export default app

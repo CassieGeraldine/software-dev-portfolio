@@ -10,6 +10,16 @@ export async function submitContactForm(
   additionalData?: { ipAddress?: string; userAgent?: string }
 ): Promise<ContactSubmissionResponse> {
   try {
+    // Check if Firebase is initialized
+    if (!db) {
+      console.error('Firebase not initialized. Please check your environment variables.')
+      return {
+        success: false,
+        message: 'Database not available. Please try again later.',
+        error: 'Firebase not initialized',
+      }
+    }
+
     const submission: Omit<ContactSubmission, 'id'> = {
       ...formData,
       timestamp: new Date(),
@@ -51,6 +61,11 @@ export async function submitContactForm(
 // Get all contact submissions (for admin dashboard)
 export async function getContactSubmissions(): Promise<ContactSubmission[]> {
   try {
+    if (!db) {
+      console.error('Firebase not initialized')
+      return []
+    }
+
     const q = query(
       collection(db, COLLECTION_NAME),
       orderBy('timestamp', 'desc')
